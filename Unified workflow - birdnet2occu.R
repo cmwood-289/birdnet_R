@@ -7,7 +7,7 @@ install_birdnet() # prompted by "No version of birdnet found"
 reticulate::install_python(list = TRUE) # prompted by "Python release version '3.11' not found"
 
 # Initialize a BirdNET model
-model <- birdnet_model_tflite()
+model <- birdnet_model_tflite() # not working yet
 
 
 # Process outputs ----
