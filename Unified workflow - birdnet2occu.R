@@ -1,3 +1,6 @@
+# A fully R-based workflow for BirdNET and occupancy modeling #
+
+
 # Analyze Audio----
 
 pak::pak("birdnet-team/birdnetR")
@@ -8,18 +11,28 @@ pak::pak("birdnet-team/birdnetR")
 library(birdnetR) 
 
 # Initialize a BirdNET model
-model <- load_birdnet() # how much version control do we have here?
-
+model <- load_birdnet(type = 'acoustic',
+                      version = '2.4',
+                      backend = 'tf',
+                      precision = 'fp32', # what does this actually mean vs 'fp16' or 'int8'
+                      lang = 'en_us') 
 
 getwd()
 # Specify input audio
-# not currently working, waiting for Felix's input
-audio_path <- system.file("./test_data",
-                          "163134SoCalOwls02_032K_G25-C3642-U1_S0062_20250424_180000-0700.flac", 
-                          package = "birdnetR")
+audio_folders <- list.dirs('./test_data/G25_C3542_48kHz_wav',
+                           recursive = T)
 
-file.path("./test_data/163134SoCalOwls02_032K_G25-C3642-U1_S0062_20250424_180000-0700.flac")
+for (folder in audio_folders) {
+  files <- list.files(folder, pattern = "\\.flac$", full.names = TRUE) # doesn't work for .flac?
+  predictions <- predict(model, files)
+  
+  out_file <- file.path("results", paste0(basename(folder), ".csv"))
+  write_predictions(predictions, 
+                    file = out_file,
+                    format = 'csv')
+}
 
+list.files(audio_folders[1], pattern = "\\.flac$", full.names = TRUE)
 
 # Analyze audio
 output <- as.data.frame(predict(model, audio_path))
