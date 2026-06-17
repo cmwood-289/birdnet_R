@@ -195,6 +195,15 @@ history_OSFL <- birdnet_detection_history(data = OSFL,
 # history_output$detection_summary  # The long-format diagnostic dataframe
 #
 
+dim(MOQU) # 1,244,394 retained MOQU predictions...
+
+summary(history_MOQU$detection_summary$n_detections) 
+# ... but for some reason there are zero detections
+
+sum(rowSums(history_MOQU$detection_history, na.rm=T)>0)/dim(history_MOQU$detection_history)[1]
+# indeed, naive occupancy is zero
+
+
 # Fit occupancy models ----
 
 library(unmarked) # developers: Fiske and Chandler (2011), Ken Kellner (2023)
@@ -205,14 +214,17 @@ dim(history_OSFL$detection_history)
 dim(history_HEWA$detection_history)
 dim(history_OSFL$detection_history)
 
-umf_MOQU <- unmarkedFrameOccu(y = history_MOQU,
-                              siteCovs = Null,
-                              obsCovs = list(effort = effort_MOQU, # 'effort_MOQU' not yet created
-                                             time = matrix(c(rep(scale(seq(1,dim(history_MOQU$detection_history)[2], by=1)), 
-                                                                 dim(history_MOQU$detection_history)[1])),
-                                                           nrow = dim(history_MOQU$detection_history)[1], 
-                                                           ncol = dim(history_MOQU$detection_history)[2],
-                                                           byrow = T)) )
+umf_MOQU <- unmarkedFrameOccu(y = history_MOQU$detection_history)
+                              #siteCovs = NA,
+                              # obsCovs = list(effort = effort_MOQU, # 'effort_MOQU' not yet created
+                              #                time = matrix(c(rep(scale(seq(1,dim(history_MOQU$detection_history)[2], by=1)), 
+                              #                                    dim(history_MOQU$detection_history)[1])),
+                              #                              nrow = dim(history_MOQU$detection_history)[1], 
+                              #                              ncol = dim(history_MOQU$detection_history)[2],
+                              #                              byrow = T)) )
 
-                                             
+MOQU.0=occu(~1
+            ~1,
+            data = umf_MOQU)
+
 
