@@ -183,13 +183,20 @@ effort <- birdnet_get_effort(top_audio_folder, i = -3)
 # Build the encounter histories
 history_MOQU <- birdnet_detection_history(data = MOQU,
                                           effort_data = effort,
-                                          survey_interval = "7 days")
+                                          survey_interval = "7 days",
+                                          i = -3) 
+# Sunny's note: 'i' is the position of the site identifier in the file path, here the 3rd-to-last element. This value was used based on line 180 of 'birdnet_get_effort()' 
+
+
 history_HEWA <- birdnet_detection_history(data = HEWA,
                                           effort_data = effort,
-                                          survey_interval = "7 days")
+                                          survey_interval = "7 days",
+                                          i = -3)
+
 history_OSFL <- birdnet_detection_history(data = OSFL,
                                           effort_data = effort,
-                                          survey_interval = "7 days")
+                                          survey_interval = "7 days", 
+                                          i = -3)
 
 # history_output$detection_history  # The binary site-by-occasion matrix
 # history_output$detection_summary  # The long-format diagnostic dataframe
