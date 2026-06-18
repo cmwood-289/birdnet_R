@@ -169,6 +169,9 @@ OSFL <- birdnet_filter(full_outputs_combined,
                        #max_date = "2023-06-30",
                        #hour = c(0:23)
                        )
+save(MOQU, file='birdnet_filter_MOQU.rda')
+save(HEWA, file='birdnet_filter_HEWA.rda')
+save(OSFL, file='birdnet_filter_OSFL.rda')
 
 # Make some heatmaps for fun
 birdnet_heatmap(MOQU)
@@ -178,30 +181,34 @@ birdnet_heatmap(OSFL)
 
 # Generate survey effort
 effort <- birdnet_get_effort(top_audio_folder, i = -3) 
+save(effort, file='effort.rda')
+
 # note: numbers are slightly off because I filtered files by filename in the birdnet loop, not a problem here though
 
 # Build the encounter histories
 history_MOQU <- birdnet_detection_history(data = MOQU,
                                           effort_data = effort,
-                                          survey_interval = "7 days")
+                                          survey_interval = "7 days",
+                                          i = -3)
 history_HEWA <- birdnet_detection_history(data = HEWA,
                                           effort_data = effort,
-                                          survey_interval = "7 days")
+                                          survey_interval = "7 days",
+                                          i = -3)
 history_OSFL <- birdnet_detection_history(data = OSFL,
                                           effort_data = effort,
-                                          survey_interval = "7 days")
+                                          survey_interval = "7 days",
+                                          i = -3)
 
 # history_output$detection_history  # The binary site-by-occasion matrix
 # history_output$detection_summary  # The long-format diagnostic dataframe
 #
 
-dim(MOQU) # 1,244,394 retained MOQU predictions...
-
-summary(history_MOQU$detection_summary$n_detections) 
-# ... but for some reason there are zero detections
-
 sum(rowSums(history_MOQU$detection_history, na.rm=T)>0)/dim(history_MOQU$detection_history)[1]
-# indeed, naive occupancy is zero
+# naive occupancy is 0.897
+sum(rowSums(history_HEWA$detection_history, na.rm=T)>0)/dim(history_HEWA$detection_history)[1]
+# naive occupancy is 0.366
+sum(rowSums(history_OSFL$detection_history, na.rm=T)>0)/dim(history_OSFL$detection_history)[1]
+# naive occupancy is 0.73
 
 
 # Fit occupancy models ----
@@ -209,22 +216,48 @@ sum(rowSums(history_MOQU$detection_history, na.rm=T)>0)/dim(history_MOQU$detecti
 library(unmarked) # developers: Fiske and Chandler (2011), Ken Kellner (2023)
 library(spOccupancy) # developer: Jeff Doser
 
-dim(effort)
-dim(history_OSFL$detection_history)
-dim(history_HEWA$detection_history)
-dim(history_OSFL$detection_history)
 
-umf_MOQU <- unmarkedFrameOccu(y = history_MOQU$detection_history)
+## Mountain Quail ----
+umf_MOQU <- unmarkedFrameOccu(y = history_MOQU$detection_history,
                               #siteCovs = NA,
-                              # obsCovs = list(effort = effort_MOQU, # 'effort_MOQU' not yet created
-                              #                time = matrix(c(rep(scale(seq(1,dim(history_MOQU$detection_history)[2], by=1)), 
-                              #                                    dim(history_MOQU$detection_history)[1])),
-                              #                              nrow = dim(history_MOQU$detection_history)[1], 
-                              #                              ncol = dim(history_MOQU$detection_history)[2],
-                              #                              byrow = T)) )
+                              obsCovs = list(
+                                #effort = effort_MOQU, # 'effort_MOQU' not yet created
+                                time = matrix(c(rep(scale(seq(1,dim(history_MOQU$detection_history)[2], by=1)),
+                                                    dim(history_MOQU$detection_history)[1])),
+                                              nrow = dim(history_MOQU$detection_history)[1],
+                                              ncol = dim(history_MOQU$detection_history)[2],
+                                              byrow = T)) )
 
 MOQU.0=occu(~1
             ~1,
             data = umf_MOQU)
+MOQU.1=occu(~time
+            ~1,
+            data = umf_MOQU)
+MOQU.2=occu(~time + I(time^2)
+            ~1,
+            data = umf_MOQU)
+modSel(fitList(null=MOQU.0, time=MOQU.1, time2=MOQU.2))
 
+## Hermit Warbler ----
+umf_HEWA <- unmarkedFrameOccu(y = history_HEWA$detection_history,
+                              #siteCovs = NA,
+                              obsCovs = list(
+                                #effort = effort_HEWA, # 'effort_HEWA' not yet created
+                                time = matrix(c(rep(scale(seq(1,dim(history_HEWA$detection_history)[2], by=1)),
+                                                    dim(history_HEWA$detection_history)[1])),
+                                              nrow = dim(history_HEWA$detection_history)[1],
+                                              ncol = dim(history_HEWA$detection_history)[2],
+                                              byrow = T)) )
+
+HEWA.0=occu(~1
+            ~1,
+            data = umf_HEWA)
+HEWA.1=occu(~time
+            ~1,
+            data = umf_HEWA)
+HEWA.2=occu(~time + I(time^2)
+            ~1,
+            data = umf_HEWA)
+modSel(fitList(null=HEWA.0, time=HEWA.1, time2=HEWA.2))
 
