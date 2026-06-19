@@ -189,15 +189,18 @@ save(effort, file='effort.rda')
 history_MOQU <- birdnet_detection_history(data = MOQU,
                                           effort_data = effort,
                                           survey_interval = "7 days",
-                                          i = -3)
+                                          i = -3,
+                                         min_unique_days = 2)
 history_HEWA <- birdnet_detection_history(data = HEWA,
                                           effort_data = effort,
                                           survey_interval = "7 days",
-                                          i = -3)
+                                          i = -3,
+                                         min_unique_days = 2)
 history_OSFL <- birdnet_detection_history(data = OSFL,
                                           effort_data = effort,
                                           survey_interval = "7 days",
-                                          i = -3)
+                                          i = -3,
+                                         min_unique_days = 2)
 
 # history_output$detection_history  # The binary site-by-occasion matrix
 # history_output$detection_summary  # The long-format diagnostic dataframe
