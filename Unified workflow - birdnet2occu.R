@@ -126,10 +126,6 @@ MOQU <- birdnet_filter(outputs_combined,
 
 ## Continuation of 'Full-sale analysis'----
 
-remotes::install_github("birdnet-team/birdnetTools", 
-                        ref = "occupancy-modelling-functions")
-# skipped updates
-
 library(tidyverse)
 library(birdnetTools)
 
